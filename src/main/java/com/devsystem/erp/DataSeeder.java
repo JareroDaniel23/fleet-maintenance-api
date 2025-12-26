@@ -3,9 +3,11 @@ package com.devsystem.erp;
 import com.devsystem.erp.models.Supply;
 import com.devsystem.erp.models.VehicleType;
 import com.devsystem.erp.models.SupplyConsumption;
+import com.devsystem.erp.models.WashingService;
 import com.devsystem.erp.repositories.SupplyRepository;
 import com.devsystem.erp.repositories.VehicleTypeRepository;
 import com.devsystem.erp.repositories.SupplyConsumptionRepository;
+import com.devsystem.erp.repositories.WashingServiceRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -14,25 +16,28 @@ public class DataSeeder implements CommandLineRunner{
     private final SupplyRepository supplyRepo;
     private final VehicleTypeRepository vehicleTypeRepo;
     private final SupplyConsumptionRepository consumptionRepo;
+    private final WashingServiceRepository washingServiceRepository;
 
     private Supply degreaser;
     private Supply disinfectant;
     private Supply bleach;
 
-    public DataSeeder (SupplyRepository supplyRepo, VehicleTypeRepository vehicleTypeRepo, SupplyConsumptionRepository consumptionRepo){
+    public DataSeeder (SupplyRepository supplyRepo, VehicleTypeRepository vehicleTypeRepo, SupplyConsumptionRepository consumptionRepo, WashingServiceRepository washingServiceRepository){
         this.supplyRepo = supplyRepo;
         this.vehicleTypeRepo = vehicleTypeRepo;
         this.consumptionRepo = consumptionRepo;
+        this.washingServiceRepository = washingServiceRepository;
     }
 
     @Override
     public void run(String... args) {
+
         if(supplyRepo.count() == 0 ){
             System.out.println("Seeding Chemicals...");
 
-            supplyRepo.save(new Supply("CHEM-DEG", "Degreaser", 0.0, "mL"));
-            supplyRepo.save(new Supply("CHEM-DES", "Disinfectant", 0.0, "mL"));
-            supplyRepo.save(new Supply("CHEM-", "Bleach", 0.0, "mL"));
+            supplyRepo.save(new Supply("CHEM-DEG", "Degreaser", 0.0, "mL",0.0));
+            supplyRepo.save(new Supply("CHEM-DES", "Disinfectant", 0.0, "mL",0.0));
+            supplyRepo.save(new Supply("CHEM-", "Bleach", 0.0, "mL",0.0));
         }
 
         this.degreaser =  supplyRepo.findAll().stream().filter(s -> s.getName().equals("Degreaser")).findFirst().orElse(null);
@@ -144,7 +149,28 @@ public class DataSeeder implements CommandLineRunner{
             // Trailer Mini Backhoe
             createRecipe("Trailer-Mini_Backhoe", 250.0, 250.0, 0.0);
         }
+
+        if(washingServiceRepository.count() == 0){
+            VehicleType carType = vehicleTypeRepo.findAll().stream()
+                    .filter(v -> v.getName().equals("Car")).findFirst().orElse(null);
+
+            if (carType != null){
+                WashingService washing1 = WashingService.builder()
+                        .date(java.time.LocalDate.now())
+                        .vehicleType(carType)
+                        .washingMinutes(45)
+                        .waterUsed(100.0)
+                        .disinfectantUsed(50.0)
+                        .degreaserUsed(45.0)
+                        .bleachUsed(0.0)
+                        .build();
+
+                washingServiceRepository.save(washing1);
+                System.out.println("Washing Service Test Data Created!");
+            }
+        }
     }
+
 
     private void createRecipe(String vehicleName, Double degreaserQty, Double disinfectantQty , Double bleachQty){
         VehicleType v = vehicleTypeRepo.save(new VehicleType(null, vehicleName, ""));
