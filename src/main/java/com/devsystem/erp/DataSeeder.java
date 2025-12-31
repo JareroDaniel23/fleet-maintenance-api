@@ -1,15 +1,10 @@
 package com.devsystem.erp;
 
-import com.devsystem.erp.models.Supply;
-import com.devsystem.erp.models.VehicleType;
-import com.devsystem.erp.models.SupplyConsumption;
-import com.devsystem.erp.models.WashingService;
-import com.devsystem.erp.repositories.SupplyRepository;
-import com.devsystem.erp.repositories.VehicleTypeRepository;
-import com.devsystem.erp.repositories.SupplyConsumptionRepository;
-import com.devsystem.erp.repositories.WashingServiceRepository;
+import com.devsystem.erp.models.*;
+import com.devsystem.erp.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import java.time.LocalDate;
 
 @Component
 public class DataSeeder implements CommandLineRunner{
@@ -17,20 +12,38 @@ public class DataSeeder implements CommandLineRunner{
     private final VehicleTypeRepository vehicleTypeRepo;
     private final SupplyConsumptionRepository consumptionRepo;
     private final WashingServiceRepository washingServiceRepository;
+    private final FlejeLogRepository flejeLogRepository;
 
     private Supply degreaser;
     private Supply disinfectant;
     private Supply bleach;
 
-    public DataSeeder (SupplyRepository supplyRepo, VehicleTypeRepository vehicleTypeRepo, SupplyConsumptionRepository consumptionRepo, WashingServiceRepository washingServiceRepository){
+    public DataSeeder (SupplyRepository supplyRepo,
+                       VehicleTypeRepository vehicleTypeRepo,
+                       SupplyConsumptionRepository consumptionRepo,
+                       WashingServiceRepository washingServiceRepository,
+                       FlejeLogRepository flejeLogRepository){
         this.supplyRepo = supplyRepo;
         this.vehicleTypeRepo = vehicleTypeRepo;
         this.consumptionRepo = consumptionRepo;
         this.washingServiceRepository = washingServiceRepository;
+        this.flejeLogRepository = flejeLogRepository;
     }
 
     @Override
     public void run(String... args) {
+
+        if(flejeLogRepository.count() == 0 ){
+            flejeLogRepository.save(FlejeLog.builder()
+                    .date(LocalDate.now())
+                    .driverName("Carlos 'El Rápido' G.")
+                    .vehicleType("Trailer Caja Seca")
+                    .washerName("Equipo B")
+                    .licensePlate("PDF-2023")
+                    .initialStrap("00991")
+                    .finalStrap("00992")
+                    .build());
+        }
 
         if(supplyRepo.count() == 0 ){
             System.out.println("Seeding Chemicals...");
